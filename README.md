@@ -1,0 +1,2 @@
+# lazyboy
+CouchDB java client
