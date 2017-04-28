@@ -14,6 +14,7 @@ import org.junit.experimental.categories.Category;
 
 import nz.co.zerosandones.lazyboy.DatabaseExistsException;
 import nz.co.zerosandones.lazyboy.DatabaseNameException;
+import nz.co.zerosandones.lazyboy.DatabaseNotFoundException;
 import nz.co.zerosandones.lazyboy.IntegrationTest;
 import nz.co.zerosandones.lazyboy.ResponseException;
 import nz.co.zerosandones.lazyboy.ServerConnectionException;
@@ -39,6 +40,11 @@ public class HttpCouchConnectionIntegrationTest {
 		deleteDatabase = new URL(serverAddress, "new_database_that_exists");
 		connection = (HttpURLConnection)deleteDatabase.openConnection();
 		connection.setRequestMethod("DELETE");
+		connection.getResponseCode();
+		
+		URL createDatabase = new URL(serverAddress, "delete_database");
+		connection = (HttpURLConnection)createDatabase.openConnection();
+		connection.setRequestMethod("PUT");
 		connection.getResponseCode();
 		
 	}
@@ -73,6 +79,30 @@ public class HttpCouchConnectionIntegrationTest {
 	public void createDatabasewithInvalidNameTest() throws ResponseException, ServerConnectionException, IOException, DatabaseNameException, DatabaseExistsException {
 		HttpCouchConnection couchConnection = new HttpCouchConnection(cf);
 		couchConnection.createDatabase("@new_database");
+	}
+	
+	@Test
+	public void deleteDatabaseTest() throws ResponseException, ServerConnectionException, IOException, DatabaseNameException, DatabaseNotFoundException {
+		HttpCouchConnection couchConnection = new HttpCouchConnection(cf);
+		couchConnection.deleteDatabase("delete_database");
+		
+		URL deleteDatabase = new URL(couchDBServerAddress, "delete_database");
+		HttpURLConnection connection = (HttpURLConnection)deleteDatabase.openConnection();
+		connection.setRequestMethod("HEAD");
+		int responseCode = connection.getResponseCode();
+		assertEquals(404, responseCode);
+	}
+	
+	@Test(expected=DatabaseNotFoundException.class)
+	public void deleteDatabaseThatDoesNotExistTest() throws ResponseException, ServerConnectionException, IOException, DatabaseNameException, DatabaseNotFoundException {
+		HttpCouchConnection couchConnection = new HttpCouchConnection(cf);
+		couchConnection.deleteDatabase("database_not_found");
+	}
+	
+	@Test(expected=DatabaseNameException.class)
+	public void deleteDatabaseWithIncompatableNameTest() throws ResponseException, ServerConnectionException, IOException, DatabaseNameException, DatabaseNotFoundException {
+		HttpCouchConnection couchConnection = new HttpCouchConnection(cf);
+		couchConnection.deleteDatabase("@new_database");
 	}
 
 }

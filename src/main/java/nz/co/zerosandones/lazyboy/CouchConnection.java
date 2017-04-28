@@ -12,11 +12,24 @@ import java.io.IOException;
 public interface CouchConnection {
 	
 	/**
-	 * Creates a database on the couchDB server
+	 * Creates a database on the couchDB server with the given name
 	 * 
 	 * @param databaseName the name of the database to be made
+	 * @throws IOException if there was an error with the connection to the CouchDB server
+	 * @throws DatabaseExistsException if a database with the given name already exists
+	 * @throws DatabaseNameException if the name of the database is invalid
+	 * @throws ResponseException if the response from the server is unexpected
 	 */
-	public void createDatabase(String databaseName) throws IOException, DatabaseExistsException, DatabaseNameException;
+	public void createDatabase(String databaseName) throws IOException, DatabaseExistsException, DatabaseNameException, ResponseException;
 	
-
+	/**
+	 * Deletes the database on the CouchDB server with the given name
+	 * 
+	 * @param databaseName the name of the database to delete
+	 * @throws IOException if there was an error with the connection to the CouchDB server
+	 * @throws DatabaseNotFoundException if the database does not exist
+	 * @throws DatabaseNameException if the name of the database is invalid
+	 * @throws ResponseException if the response from the server is unexpected
+	 */
+	public void deleteDatabase(String databaseName) throws IOException, DatabaseNotFoundException, DatabaseNameException, ResponseException;
 }

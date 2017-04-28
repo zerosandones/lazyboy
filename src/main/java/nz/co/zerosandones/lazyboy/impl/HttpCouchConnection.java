@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import nz.co.zerosandones.lazyboy.CouchConnection;
 import nz.co.zerosandones.lazyboy.DatabaseExistsException;
 import nz.co.zerosandones.lazyboy.DatabaseNameException;
+import nz.co.zerosandones.lazyboy.DatabaseNotFoundException;
 import nz.co.zerosandones.lazyboy.ResponseException;
 import nz.co.zerosandones.lazyboy.ServerConnectionException;
 
@@ -46,12 +47,12 @@ public class HttpCouchConnection implements CouchConnection {
 	}
 
 	@Override
-	public void createDatabase(String databaseName) throws IOException, DatabaseNameException, DatabaseExistsException {
+	public void createDatabase(String databaseName) throws IOException, DatabaseNameException, DatabaseExistsException, ResponseException {
 		logger.trace("createDatabase(String {})", databaseName);
 		HttpURLConnection couchDBConnection = this.connectionFactory.createConnection(databaseName);
 		couchDBConnection.setRequestMethod("PUT");
 		int responseCode = couchDBConnection.getResponseCode();
-		if(responseCode == 200){
+		if(responseCode == 201){
 			logger.debug("database {} made", databaseName);
 		}else if(responseCode == 400){
 			logger.error("database name {} is invalid", databaseName);
@@ -59,6 +60,30 @@ public class HttpCouchConnection implements CouchConnection {
 		}else if(responseCode == 412){
 			logger.error("database name {} already exists", databaseName);
 			throw new DatabaseExistsException();
+		}else{
+			logger.error("Unsupported response {}", responseCode);
+			throw new ResponseException("Unsupported response", responseCode);
+		}
+		
+	}
+
+	@Override
+	public void deleteDatabase(String databaseName) throws IOException, DatabaseNotFoundException, DatabaseNameException, ResponseException {
+		logger.trace("deleteDatabase(String {})", databaseName);
+		HttpURLConnection couchDBConnection = this.connectionFactory.createConnection(databaseName);
+		couchDBConnection.setRequestMethod("DELETE");
+		int responseCode = couchDBConnection.getResponseCode();
+		if(responseCode == 200){
+			logger.debug("database {} deleted", databaseName);
+		}else if(responseCode == 400){
+			logger.error("database name {} is invalid", databaseName);
+			throw new DatabaseNameException();
+		}else if(responseCode == 404){
+			logger.error("database {} does not exists", databaseName);
+			throw new DatabaseNotFoundException();
+		}else{
+			logger.error("Unsupported response {}", responseCode);
+			throw new ResponseException("Unsupported response", responseCode);
 		}
 		
 	}
