@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.junit.Test;
@@ -34,6 +35,15 @@ public class HttpConnectionFactoryTest {
 	public void createHttpConnectionFactoryWithUnsupportProtocol() throws URLNotSupportedException, IOException{
 		URL address = new URL("ftp://localhost");
 		cf = new HttpConnectionFactory(address);
+	}
+	
+	@Test
+	public void createHttpURLConnectionWithRelativePathTest() throws IOException{
+		URL address = new URL("http://localhost");
+		cf = new HttpConnectionFactory(address);
+		HttpURLConnection connection = cf.createConnection("new_database");
+		assertNotNull(connection);
+		assertEquals("http://localhost/new_database", connection.getURL().toString());
 	}
 
 }

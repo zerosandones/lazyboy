@@ -2,6 +2,7 @@ package nz.co.zerosandones.lazyboy.impl;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -61,6 +62,13 @@ class HttpConnectionFactory {
 		logger.debug("creating new HttpURLConnection");
 		return (HttpURLConnection)this.baseURL.openConnection();
 		
+	}
+	
+	public HttpURLConnection createConnection(String relativePath) throws IOException{
+		logger.debug("creating new HttpURLConnection with relative path {}", relativePath);
+		URL fullPathName = new URL(baseURL, relativePath);
+		logger.debug("url address = {}", fullPathName.toString());
+		return (HttpURLConnection)fullPathName.openConnection();
 	}
 
 }
